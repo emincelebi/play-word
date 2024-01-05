@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:play_word/constants/constants.dart';
 import 'package:play_word/models/question_model.dart';
@@ -166,13 +165,35 @@ class _GameViewState extends State<GameView> {
     );
   }
 
+  Widget showLevel() {
+    if (widget.level == 'a') {
+      return const Text('A LEVEL', style: TextStyle(fontSize: 25, color: Colors.black));
+    } else if (widget.level == 'b') {
+      return const Text('B LEVEL', style: TextStyle(fontSize: 25, color: Colors.black));
+    } else {
+      return const Text('C LEVEL', style: TextStyle(fontSize: 25, color: Colors.black));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Word Play'),
         actions: [
-          customIconButton(),
+          IconButton(
+              onPressed: () async {
+                if (isStar(question)) {
+                  starDb.deleteStar(question);
+                  starQuestions.remove(question);
+                } else {
+                  starDb.insertQuestion(QuestionModel(question: question, answer: answer));
+                  starQuestions.add(question);
+                }
+                setState(() {});
+              },
+              icon: isStar(question) ? const Icon(Icons.star) : const Icon(Icons.star_border_outlined)),
         ],
       ),
       body: SafeArea(
@@ -192,6 +213,7 @@ class _GameViewState extends State<GameView> {
                 ],
               ),
               const Divider(color: Colors.black),
+              showLevel(),
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: GridView.builder(
@@ -216,10 +238,19 @@ class _GameViewState extends State<GameView> {
               TextField(
                 keyboardType: TextInputType.multiline,
                 controller: textController,
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.question_answer_outlined),
-                  hintText: 'Enter Your Answer',
+                style: TextStyle(color: Colors.blue.shade500),
+                decoration: InputDecoration(
                   labelText: 'Answer',
+                  hintText: 'Enter Your Answer',
+                  prefixIcon: const Icon(Icons.question_answer_outlined, color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[800], // Alan rengi
+                  labelStyle: const TextStyle(color: Colors.white),
+                  hintStyle: TextStyle(color: Colors.grey[400]),
                 ),
               ),
               const SizedBox(height: 15),
@@ -239,35 +270,15 @@ class _GameViewState extends State<GameView> {
                 },
                 child: const Text('Submit'),
               ),
-              TextButton(onPressed: hint > 0 ? () => takeHint() : null, child: const Text('Hint')),
+              TextButton(
+                  onPressed: hint > 0 ? () => takeHint() : null,
+                  child: const Text(
+                    'Hint',
+                  )),
             ],
           ),
         ),
       ),
     );
-  }
-
-  IconButton customIconButton() {
-    return IconButton(
-        onPressed: () async {
-          if (isStar(question)) {
-            starDb.deleteStar(question);
-            starQuestions.remove(question);
-          } else {
-            int res = await starDb.insertQuestion(QuestionModel(question: question, answer: answer));
-            if (res > 0) {
-              if (kDebugMode) {
-                print('eklenmedi');
-              } else {
-                if (kDebugMode) {
-                  print('eklendi');
-                }
-              }
-            }
-            starQuestions.add(question);
-          }
-          setState(() {});
-        },
-        icon: isStar(question) ? const Icon(Icons.star) : const Icon(Icons.star_border_outlined));
   }
 }

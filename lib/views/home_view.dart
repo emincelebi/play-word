@@ -14,22 +14,11 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   late QuestionDatabaseHelper queDb;
-  int aQuest = 0;
-  int bQuest = 0;
-  int cQuest = 0;
 
   @override
   void initState() {
     queDb = QuestionDatabaseHelper();
-    fetchNumber();
     super.initState();
-  }
-
-  fetchNumber() async {
-    aQuest = await queDb.getNumberQuestion('a');
-    bQuest = await queDb.getNumberQuestion('b');
-    cQuest = await queDb.getNumberQuestion('c');
-    setState(() {});
   }
 
   @override
@@ -56,7 +45,7 @@ class _HomeViewState extends State<HomeView> {
                           child: Wrap(
                             children: [
                               ListTile(
-                                title: Text('A level: $aQuest', style: const TextStyle(color: Colors.black)),
+                                title: const Center(child: Text('A level', style: TextStyle(color: Colors.black))),
                                 onTap: () {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).push(MaterialPageRoute(
@@ -72,7 +61,7 @@ class _HomeViewState extends State<HomeView> {
                                 endIndent: 20,
                               ),
                               ListTile(
-                                title: Text('B level: $bQuest', style: const TextStyle(color: Colors.black)),
+                                title: const Center(child: Text('B level', style: TextStyle(color: Colors.black))),
                                 onTap: () {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).push(MaterialPageRoute(
@@ -88,7 +77,7 @@ class _HomeViewState extends State<HomeView> {
                                 endIndent: 20,
                               ),
                               ListTile(
-                                title: Text('C level: $cQuest', style: const TextStyle(color: Colors.black)),
+                                title: const Center(child: Text('C level', style: TextStyle(color: Colors.black))),
                                 onTap: () {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).push(MaterialPageRoute(

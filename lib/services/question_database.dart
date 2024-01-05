@@ -38,7 +38,7 @@ class QuestionDatabaseHelper {
 
   Future<List<String>> getQuestionNames(String level) async {
     final db = await database;
-    var res = await db.query(tableName, where:"level = ?", whereArgs: [level]);
+    var res = await db.query(tableName, where: "level = ?", whereArgs: [level]);
 
     List<String?> questionNames = res.isNotEmpty ? res.map((e) => QuestionModel.fromJson(e).question).toList() : [];
 
@@ -46,6 +46,23 @@ class QuestionDatabaseHelper {
 
     return filteredQuestionNames;
   }
+
+  Future<String?> getQuestionLevel(String name) async {
+  final db = await database;
+  var res = await db.query(
+    tableName,
+    columns: ['level'],
+    where: 'question = ?',
+    whereArgs: [name],
+  );
+  
+  if (res.isNotEmpty) {
+    return res.first['level'] as String?;
+  } else {
+    return null;
+  }
+}
+
 
   Future<List<String>> getAnswerNames(String level) async {
     final db = await database;
@@ -70,7 +87,7 @@ class QuestionDatabaseHelper {
 
   Future<int> getNumberQuestion(String level) async {
     final db = await database;
-    var res = await db.query(tableName, where:"level = ?", whereArgs: [level]);
+    var res = await db.query(tableName, where: "level = ?", whereArgs: [level]);
 
     List<String?> questionNames = res.isNotEmpty ? res.map((e) => QuestionModel.fromJson(e).question).toList() : [];
 

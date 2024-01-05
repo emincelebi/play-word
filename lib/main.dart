@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:play_word/constants/a1a2_question_words.dart';
 import 'package:play_word/constants/b1b2_question_wrods.dart';
 import 'package:play_word/constants/c1_question.dart';
@@ -9,7 +9,14 @@ import 'package:play_word/theme/light_theme.dart';
 import 'package:play_word/views/home_view.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterNativeSplash.remove();
   runApp(const MyApp());
+}
+
+Future initialization(BuildContext? context) async {
+  await Future.delayed(const Duration(seconds: 3));
 }
 
 class MyApp extends StatefulWidget {
@@ -39,12 +46,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      locale: const Locale('tr', 'TR'),
-      localizationsDelegates: const [
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-        DefaultCupertinoLocalizations.delegate,
-      ],
       debugShowCheckedModeBanner: false,
       theme: isDark ? DarkTheme().theme : LightTheme().theme,
       home: AppTemplate(

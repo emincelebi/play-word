@@ -25,7 +25,8 @@ class StarDatabaseHelper {
       CREATE TABLE $tableName (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         question TEXT,
-        answer TEXT
+        answer TEXT,
+        level TEXT
       )
       ''');
   }
@@ -80,6 +81,6 @@ class StarDatabaseHelper {
 
   Future<int> deleteStar(String name) async {
     final db = await database;
-    return await db.delete(tableName, where:"question like ?", whereArgs: [name]);
+    return await db.delete(tableName, where: "question like ?", whereArgs: [name]);
   }
 }
