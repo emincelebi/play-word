@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:play_word/constants/constants.dart';
 import 'package:play_word/models/question_model.dart';
 import 'package:play_word/services/question_database.dart';
 import 'package:play_word/services/star_question_database.dart';
@@ -100,15 +101,32 @@ class _GameViewState extends State<GameView> {
     setState(() {});
   }
 
-  doControlLife() async {
-    if (life < 1) {
-      int? s = _manager.getInt('score');
-      s ??= 0;
-      if (score > s) {
-        await _manager.setInt('score', score);
-      }
+  updateScore() async {
+    String level = '';
+    switch (widget.level) {
+      case 'a':
+        level = 'score';
+        break;
+      case 'b':
+        level = 'score2';
+        break;
+      case 'c':
+        level = 'score3';
+        break;
+      default:
+    }
+    int? s;
+    s = _manager.getInt(level);
+    s ??= 0;
+    if (score > s) {
+      await _manager.setInt(level, score);
+    }
+  }
 
-      // ignore: use_build_context_synchronously
+  doControlLife() {
+    if (life < 1) {
+      updateScore();
+
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => GameOverView(score: score, answer: question),
       ));
@@ -130,6 +148,24 @@ class _GameViewState extends State<GameView> {
     }
   }
 
+  Widget showLife() {
+    List<Widget> heartIcons = [
+      const Text('Life: ', style: TextStyle(fontSize: 15, color: Colors.black)),
+    ];
+
+    if (life == 1) {
+      heartIcons.add(const Icon(Icons.heart_broken_outlined, color: Colors.red));
+    } else {
+      for (int i = 0; i < life; i++) {
+        heartIcons.add(const Icon(Icons.favorite_outline, color: Colors.red));
+      }
+    }
+
+    return Row(
+      children: heartIcons,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,9 +182,13 @@ class _GameViewState extends State<GameView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Life: $life', style: const TextStyle(fontSize: 15)),
-                  Text('Score: $score', style: const TextStyle(fontSize: 15)),
-                  Text('Hint: $hint', style: const TextStyle(fontSize: 15)),
+                  showLife(),
+                  Column(
+                    children: [
+                      Text('Score: $score', style: const TextStyle(fontSize: 15, color: Colors.black)),
+                      Text('   Hint: $hint', style: const TextStyle(fontSize: 15, color: Colors.black)),
+                    ],
+                  ),
                 ],
               ),
               const Divider(color: Colors.black),
@@ -165,15 +205,13 @@ class _GameViewState extends State<GameView> {
                     return Center(
                       child: Text(
                         wordLetters[index],
-                        style: TextStyle(
-                          fontSize: calculateFontSize(wordLetters.length),
-                        ),
+                        style: TextStyle(fontSize: calculateFontSize(wordLetters.length), color: Colors.black),
                       ),
                     );
                   },
                 ),
               ),
-              Text(answer, style: const TextStyle(fontSize: 15)),
+              Text(answer, style: TextStyle(fontSize: 15, color: Constants.appBarColorDark)),
               const SizedBox(height: 25),
               TextField(
                 keyboardType: TextInputType.multiline,

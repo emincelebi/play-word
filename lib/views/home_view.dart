@@ -46,10 +46,17 @@ class _HomeViewState extends State<HomeView> {
                       context: context,
                       builder: (BuildContext context) {
                         return Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            ),
+                          ),
                           child: Wrap(
                             children: [
                               ListTile(
-                                title: Text('A level: $aQuest'),
+                                title: Text('A level: $aQuest', style: const TextStyle(color: Colors.black)),
                                 onTap: () {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).push(MaterialPageRoute(
@@ -57,8 +64,15 @@ class _HomeViewState extends State<HomeView> {
                                   ));
                                 },
                               ),
+                              const Divider(
+                                color: Colors.grey,
+                                height: 1,
+                                thickness: 1,
+                                indent: 20,
+                                endIndent: 20,
+                              ),
                               ListTile(
-                                title: Text('B level: $bQuest'),
+                                title: Text('B level: $bQuest', style: const TextStyle(color: Colors.black)),
                                 onTap: () {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).push(MaterialPageRoute(
@@ -66,8 +80,15 @@ class _HomeViewState extends State<HomeView> {
                                   ));
                                 },
                               ),
+                              const Divider(
+                                color: Colors.grey,
+                                height: 1,
+                                thickness: 1,
+                                indent: 20,
+                                endIndent: 20,
+                              ),
                               ListTile(
-                                title: Text('C level: $cQuest'),
+                                title: Text('C level: $cQuest', style: const TextStyle(color: Colors.black)),
                                 onTap: () {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).push(MaterialPageRoute(
@@ -87,11 +108,19 @@ class _HomeViewState extends State<HomeView> {
                   onPressed: () async {
                     final SharedPreferences prefs = await SharedPreferences.getInstance();
                     final int score = prefs.getInt('score') ?? 0;
+                    final int score2 = prefs.getInt('score2') ?? 0;
+                    final int score3 = prefs.getInt('score3') ?? 0;
                     // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         duration: const Duration(seconds: 3),
-                        content: Text('Highest score: $score'),
+                        content: Column(
+                          children: [
+                            Text('A Level Highest score: $score'),
+                            Text('B Level Highest score: $score2'),
+                            Text('C Level Highest score: $score3'),
+                          ],
+                        ),
                       ),
                     );
                   },

@@ -15,7 +15,7 @@ class QuestionService {
         doesExist = await queDb.doesQuestionExistByWord("ELABORATE ON");
         break;
       case 'c':
-        doesExist = await queDb.doesQuestionExistByWord("ELABORATE ON");
+        doesExist = await queDb.doesQuestionExistByWord("APPROACH");
       default:
     }
 
