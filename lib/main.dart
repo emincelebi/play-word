@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:play_word/services/question_words.dart';
+import 'package:play_word/constants/a1a2_question_words.dart';
+import 'package:play_word/constants/b1b2_question_wrods.dart';
+import 'package:play_word/services/question_service.dart';
 import 'package:play_word/theme/dark_theme.dart';
 import 'package:play_word/theme/light_theme.dart';
 import 'package:play_word/views/home_view.dart';
@@ -20,11 +22,14 @@ bool isDark = true;
 
 class _MyAppState extends State<MyApp> {
   late QuestionService qServ;
+  AQuestions aQuestions = AQuestions();
+  BQuestions bQuestions = BQuestions();
 
   @override
   void initState() {
     qServ = QuestionService();
-    qServ.addSampleWords();
+    qServ.addSampleWords(aQuestions.words,'a');
+    qServ.addSampleWords(bQuestions.words,'b');
     super.initState();
   }
 

@@ -25,7 +25,8 @@ class QuestionDatabaseHelper {
       CREATE TABLE $tableName (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         question TEXT,
-        answer TEXT
+        answer TEXT,
+        level TEXT
       )
       ''');
   }
@@ -35,9 +36,9 @@ class QuestionDatabaseHelper {
     return await db.insert(tableName, question.toJson());
   }
 
-  Future<List<String>> getQuestionNames() async {
+  Future<List<String>> getQuestionNames(String level) async {
     final db = await database;
-    var res = await db.query(tableName);
+    var res = await db.query(tableName, where:"level = ?", whereArgs: [level]);
 
     List<String?> questionNames = res.isNotEmpty ? res.map((e) => QuestionModel.fromJson(e).question).toList() : [];
 
@@ -46,9 +47,9 @@ class QuestionDatabaseHelper {
     return filteredQuestionNames;
   }
 
-  Future<List<String>> getAnswerNames() async {
+  Future<List<String>> getAnswerNames(String level) async {
     final db = await database;
-    var res = await db.query(tableName);
+    var res = await db.query(tableName, where: "level = ?", whereArgs: [level]);
 
     List<String?> answerNames = res.isNotEmpty ? res.map((e) => QuestionModel.fromJson(e).answer).toList() : [];
 
@@ -65,6 +66,17 @@ class QuestionDatabaseHelper {
       whereArgs: [word],
     );
     return res.isNotEmpty;
+  }
+
+  Future<int> getNumberQuestion(String level) async {
+    final db = await database;
+    var res = await db.query(tableName, where:"level = ?", whereArgs: [level]);
+
+    List<String?> questionNames = res.isNotEmpty ? res.map((e) => QuestionModel.fromJson(e).question).toList() : [];
+
+    List<String> filteredQuestionNames = questionNames.where((name) => name != null).map((e) => e!).toList();
+
+    return filteredQuestionNames.length;
   }
 
   Future<void> clearTable() async {

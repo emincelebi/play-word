@@ -4,7 +4,7 @@ import 'package:path/path.dart';
 import 'package:play_word/models/question_model.dart';
 import 'package:sqflite/sqflite.dart';
 
-class QuestionDatabaseHelper {
+class StarDatabaseHelper {
   static Database? _database;
   static const String tableName = 'starQuestions';
 
@@ -68,13 +68,18 @@ class QuestionDatabaseHelper {
   }
 
   Future<void> clearTable() async {
-    final db = await QuestionDatabaseHelper().database;
-    await db.delete(QuestionDatabaseHelper.tableName);
+    final db = await StarDatabaseHelper().database;
+    await db.delete(StarDatabaseHelper.tableName);
   }
 
   Future<void> deleteDatabasee() async {
     final path = await getDatabasesPath();
     final dbPath = join(path, '$tableName.db');
     await deleteDatabase(dbPath);
+  }
+
+  Future<int> deleteStar(String name) async {
+    final db = await database;
+    return await db.delete(tableName, where:"question like ?", whereArgs: [name]);
   }
 }

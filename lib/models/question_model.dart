@@ -2,13 +2,15 @@ class QuestionModel {
   int? id;
   String? question;
   String? answer;
+  String? level;
 
-  QuestionModel({this.id, this.question, this.answer});
+  QuestionModel({this.id, this.question, this.answer, this.level});
 
   QuestionModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     question = json['question'];
     answer = json['answer'];
+    level = json['level'];
   }
 
   Map<String, dynamic> toJson() {
@@ -16,6 +18,7 @@ class QuestionModel {
     data['id'] = id;
     data['question'] = question;
     data['answer'] = answer;
+    data['level'] = level;
     return data;
   }
 }

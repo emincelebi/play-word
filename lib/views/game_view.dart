@@ -1,12 +1,18 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:play_word/models/question_model.dart';
 import 'package:play_word/services/question_database.dart';
+import 'package:play_word/services/star_question_database.dart';
+import 'package:play_word/services/word_manager.dart';
 import 'package:play_word/views/game_over_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// ignore: must_be_immutable
 class GameView extends StatefulWidget {
-  GameView({Key? key, this.isim}) : super(key: key);
+  GameView({Key? key, this.isim, required this.level}) : super(key: key);
   String? isim;
+  String level;
   @override
   State<GameView> createState() => _GameViewState();
 }
@@ -15,8 +21,11 @@ class _GameViewState extends State<GameView> {
   late int life;
   late int score;
   late int hint;
+  int starIndex = 0;
   TextEditingController textController = TextEditingController();
+  WordManager wManager = WordManager();
   late QuestionDatabaseHelper queDb;
+  late StarDatabaseHelper starDb;
   List starQuestions = [];
   List questions = [];
   List answers = [];
@@ -31,6 +40,7 @@ class _GameViewState extends State<GameView> {
   void initState() {
     super.initState();
     queDb = QuestionDatabaseHelper();
+    starDb = StarDatabaseHelper();
     life = 3;
     hint = 3;
     score = 0;
@@ -43,66 +53,21 @@ class _GameViewState extends State<GameView> {
   }
 
   fetchQuestions() async {
-    questions = await queDb.getQuestionNames();
-    answers = await queDb.getAnswerNames();
+    starQuestions = await starDb.getQuestionNames();
+    questions = await queDb.getQuestionNames(widget.level);
+    answers = await queDb.getAnswerNames(widget.level);
     int randomIndex = Random().nextInt(questions.length - 1);
+    starIndex = randomIndex;
     answer = answers[randomIndex];
     question = questions[randomIndex];
     setState(() {
-      wordLetters = getRandomWord(question);
+      wordLetters = wManager.getRandomWord(question);
     });
   }
 
-  List<String> getRandomWord(String word) {
-    List<String> words = [];
-
-    if (word.length >= 10) {
-      words = getRandomCensor(5, word);
-    } else if (word.length >= 8) {
-      words = getRandomCensor(4, word);
-    } else if (word.length >= 6) {
-      words = getRandomCensor(3, word);
-    } else if (word.length >= 4) {
-      words = getRandomCensor(2, word);
-    } else {
-      words = getRandomCensor(1, word);
-    }
-    return words;
-  }
-
-  List<String> getRandomCensor(int x, String word) {
-    switch (x) {
-      case 1:
-        splitWord = forLoop(1, word);
-        break;
-      case 2:
-        splitWord = forLoop(2, word);
-        break;
-      case 3:
-        splitWord = forLoop(3, word);
-        break;
-      case 4:
-        splitWord = forLoop(4, word);
-        break;
-      case 5:
-        splitWord = forLoop(5, word);
-        break;
-      default:
-    }
-
-    return splitWord;
-  }
-
-  List<String> forLoop(int c, String word) {
-    int a;
-    int b;
-    List<String> splitWord = [];
-    splitWord = word.split('');
-    for (b = 0; b < c; b++) {
-      a = Random().nextInt(word.length - 1);
-      splitWord[a] = "*";
-    }
-    return splitWord;
+  bool isStar(String name) {
+    bool star = starQuestions.contains(name);
+    return star;
   }
 
   double calculateFontSize(int wordLength) {
@@ -126,7 +91,7 @@ class _GameViewState extends State<GameView> {
       question = questions[s];
       answer = answers[s];
       setState(() {
-        wordLetters = getRandomWord(question);
+        wordLetters = wManager.getRandomWord(question);
       });
       textController.clear();
     } else {
@@ -143,6 +108,7 @@ class _GameViewState extends State<GameView> {
         await _manager.setInt('score', score);
       }
 
+      // ignore: use_build_context_synchronously
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => GameOverView(score: score, answer: question),
       ));
@@ -150,15 +116,17 @@ class _GameViewState extends State<GameView> {
   }
 
   takeHint() {
-    if (hint > 0) {
-      hint--;
-      for (int i = 0; i < splitWord.length; i++) {
-        if (splitWord[i] == "*") {
-          splitWord[i] = question[i];
-          setState(() {});
-          break;
+    bool x = wordLetters.contains('_');
+    if (hint > 0 && x) {
+      setState(() {
+        hint--;
+        for (int i = 0; i < wordLetters.length; i++) {
+          if (wordLetters[i] == "_") {
+            wordLetters[i] = question[i];
+            break;
+          }
         }
-      }
+      });
     }
   }
 
@@ -168,17 +136,22 @@ class _GameViewState extends State<GameView> {
       appBar: AppBar(
         title: const Text('Word Play'),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.star)),
+          customIconButton(),
         ],
       ),
       body: SafeArea(
         child: Center(
           child: Column(
             children: [
-              Text('Life: $life', style: const TextStyle(fontSize: 15)),
-              widget.isim != null ? Text('Player: ${widget.isim}') : const SizedBox.shrink(),
-              Text('Score: $score', style: const TextStyle(fontSize: 15)),
-              Text('Hint: $hint', style: const TextStyle(fontSize: 15)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Life: $life', style: const TextStyle(fontSize: 15)),
+                  Text('Score: $score', style: const TextStyle(fontSize: 15)),
+                  Text('Hint: $hint', style: const TextStyle(fontSize: 15)),
+                ],
+              ),
+              const Divider(color: Colors.black),
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: GridView.builder(
@@ -200,10 +173,7 @@ class _GameViewState extends State<GameView> {
                   },
                 ),
               ),
-              Text(
-                answer,
-                style: const TextStyle(fontSize: 15),
-              ),
+              Text(answer, style: const TextStyle(fontSize: 15)),
               const SizedBox(height: 25),
               TextField(
                 keyboardType: TextInputType.multiline,
@@ -214,9 +184,7 @@ class _GameViewState extends State<GameView> {
                   labelText: 'Answer',
                 ),
               ),
-              const SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               ElevatedButton(
                 onPressed: () {
                   if (textController.text.isEmpty) {
@@ -233,16 +201,35 @@ class _GameViewState extends State<GameView> {
                 },
                 child: const Text('Submit'),
               ),
-              TextButton(
-                onPressed: () {
-                  takeHint();
-                },
-                child: const Text('Hint'),
-              ),
+              TextButton(onPressed: hint > 0 ? () => takeHint() : null, child: const Text('Hint')),
             ],
           ),
         ),
       ),
     );
+  }
+
+  IconButton customIconButton() {
+    return IconButton(
+        onPressed: () async {
+          if (isStar(question)) {
+            starDb.deleteStar(question);
+            starQuestions.remove(question);
+          } else {
+            int res = await starDb.insertQuestion(QuestionModel(question: question, answer: answer));
+            if (res > 0) {
+              if (kDebugMode) {
+                print('eklenmedi');
+              } else {
+                if (kDebugMode) {
+                  print('eklendi');
+                }
+              }
+            }
+            starQuestions.add(question);
+          }
+          setState(() {});
+        },
+        icon: isStar(question) ? const Icon(Icons.star) : const Icon(Icons.star_border_outlined));
   }
 }

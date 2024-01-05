@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class GameOverView extends StatelessWidget {
   GameOverView({super.key, required this.score, required this.answer});
   int score;
