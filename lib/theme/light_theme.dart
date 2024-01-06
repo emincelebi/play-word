@@ -32,6 +32,7 @@ class LightTheme {
           foregroundColor: MaterialStateColor.resolveWith((states) => Colors.white),
         ),
       ),
+      navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.black45, indicatorColor: Colors.white),
     );
   }
 }

@@ -49,54 +49,51 @@ class _StarQuestionViewState extends State<StarQuestionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Word Play"),
-        ),
         body: Column(
-          children: [
-            Expanded(
-              child: starQuestion.isEmpty
-                  ? Center(
-                      child: Text(
-                        'you have not star question',
-                        style: TextStyle(
-                          color: Constants.appBarColorDark,
-                          fontSize: 21,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: starQuestion.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          child: ListTile(
-                            title: Text(starQuestion[index]),
-                            subtitle: Text(starAnswer[index]),
-                            leading: FutureBuilder(
-                              future: getLevel(starQuestion[index]),
-                              builder: (context, AsyncSnapshot<Widget> snapshot) {
-                                if (snapshot.connectionState == ConnectionState.done) {
-                                  return snapshot.data ?? const SizedBox();
-                                } else {
-                                  return const SizedBox();
-                                }
-                              },
-                            ),
-                            trailing: IconButton(
-                                onPressed: () async {
-                                  if (isStar(starQuestion[index])) {
-                                    starDb.deleteStar(starQuestion[index]);
-                                    starQuestion.remove(starQuestion[index]);
-                                  }
-                                  setState(() {});
-                                },
-                                icon: const Icon(Icons.star)),
-                          ),
-                        );
-                      },
+      children: [
+        Expanded(
+          child: starQuestion.isEmpty
+              ? Center(
+                  child: Text(
+                    'you have not star question',
+                    style: TextStyle(
+                      color: Constants.appBarColorDark,
+                      fontSize: 21,
                     ),
-            )
-          ],
-        ));
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: starQuestion.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      child: ListTile(
+                        title: Text(starQuestion[index]),
+                        subtitle: Text(starAnswer[index]),
+                        leading: FutureBuilder(
+                          future: getLevel(starQuestion[index]),
+                          builder: (context, AsyncSnapshot<Widget> snapshot) {
+                            if (snapshot.connectionState == ConnectionState.done) {
+                              return snapshot.data ?? const SizedBox();
+                            } else {
+                              return const SizedBox();
+                            }
+                          },
+                        ),
+                        trailing: IconButton(
+                            onPressed: () async {
+                              if (isStar(starQuestion[index])) {
+                                starDb.deleteStar(starQuestion[index]);
+                                starQuestion.remove(starQuestion[index]);
+                              }
+                              setState(() {});
+                            },
+                            icon: const Icon(Icons.star)),
+                      ),
+                    );
+                  },
+                ),
+        )
+      ],
+    ));
   }
 }

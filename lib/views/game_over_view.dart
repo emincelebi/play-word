@@ -13,6 +13,7 @@ class GameOverView extends StatelessWidget {
         return true;
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
           appBar: AppBar(
             automaticallyImplyLeading: false,
             title: const Text('Word Play'),
