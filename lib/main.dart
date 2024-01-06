@@ -6,7 +6,7 @@ import 'package:play_word/constants/c1_question.dart';
 import 'package:play_word/services/question_service.dart';
 import 'package:play_word/theme/dark_theme.dart';
 import 'package:play_word/theme/light_theme.dart';
-import 'package:play_word/views/home_view.dart';
+import 'package:play_word/views/home/home_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

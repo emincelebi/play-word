@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:play_word/constants/constants.dart';
 import 'package:play_word/services/question_database.dart';
-import 'package:play_word/services/star_question_database.dart';
 
 class StarQuestionView extends StatefulWidget {
   const StarQuestionView({super.key});
@@ -13,8 +12,8 @@ class StarQuestionView extends StatefulWidget {
 class _StarQuestionViewState extends State<StarQuestionView> {
   List starQuestion = [];
   List starAnswer = [];
-  late StarDatabaseHelper starDb;
   late QuestionDatabaseHelper queDb;
+  String selectedLevel = 'a';
 
   bool isStar(String name) {
     bool star = starQuestion.contains(name);
@@ -23,15 +22,14 @@ class _StarQuestionViewState extends State<StarQuestionView> {
 
   @override
   void initState() {
-    starDb = StarDatabaseHelper();
     queDb = QuestionDatabaseHelper();
     fetchQuestions();
     super.initState();
   }
 
   fetchQuestions() async {
-    starQuestion = await starDb.getQuestionNames();
-    starAnswer = await starDb.getAnswerNames();
+    starQuestion = await queDb.getStarredQuestionsByLevel(selectedLevel);
+    starAnswer = await queDb.getStarredQuestionAnswersByLevel(selectedLevel);
     setState(() {});
   }
 
@@ -51,11 +49,49 @@ class _StarQuestionViewState extends State<StarQuestionView> {
     return Scaffold(
         body: Column(
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Radio<String>(
+              value: 'a',
+              groupValue: selectedLevel,
+              onChanged: (value) {
+                setState(() {
+                  selectedLevel = value ?? 'a';
+                  fetchQuestions();
+                });
+              },
+            ),
+            const Text('A'),
+            Radio<String>(
+              value: 'b',
+              groupValue: selectedLevel,
+              onChanged: (value) {
+                setState(() {
+                  selectedLevel = value ?? 'a';
+                  fetchQuestions();
+                });
+              },
+            ),
+            const Text('B'),
+            Radio<String>(
+              value: 'c',
+              groupValue: selectedLevel,
+              onChanged: (value) {
+                setState(() {
+                  selectedLevel = value ?? 'a';
+                  fetchQuestions();
+                });
+              },
+            ),
+            const Text('C'),
+          ],
+        ),
         Expanded(
           child: starQuestion.isEmpty
               ? Center(
                   child: Text(
-                    'you have not star question',
+                    'you have not star question at this level',
                     style: TextStyle(
                       color: Constants.appBarColorDark,
                       fontSize: 21,
@@ -82,7 +118,7 @@ class _StarQuestionViewState extends State<StarQuestionView> {
                         trailing: IconButton(
                             onPressed: () async {
                               if (isStar(starQuestion[index])) {
-                                starDb.deleteStar(starQuestion[index]);
+                                queDb.deleteStar(starQuestion[index]);
                                 starQuestion.remove(starQuestion[index]);
                               }
                               setState(() {});

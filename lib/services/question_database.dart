@@ -26,7 +26,9 @@ class QuestionDatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         question TEXT,
         answer TEXT,
-        level TEXT
+        level TEXT,
+        isKnown TEXT,
+        isStar TEXT
       )
       ''');
   }
@@ -34,6 +36,87 @@ class QuestionDatabaseHelper {
   Future<int> insertQuestion(QuestionModel question) async {
     final db = await database;
     return await db.insert(tableName, question.toJson());
+  }
+
+  //KNOWN SERVİCE
+
+  Future<List<String>> getKnownQuestionAnswers(String level) async {
+    final db = await QuestionDatabaseHelper().database;
+    var res = await db.query(
+      QuestionDatabaseHelper.tableName,
+      columns: ['answer'],
+      where: 'isKnown = ? AND level = ?',
+      whereArgs: ['yes', level],
+    );
+
+    List<String> knownQuestionAnswers =
+        res.isNotEmpty ? res.map((e) => QuestionModel.fromJson(e).answer).whereType<String>().toList() : [];
+
+    return knownQuestionAnswers;
+  }
+
+  Future<int> deleteKnown(String question) async {
+    final db = await database;
+    return await db.update(
+      tableName,
+      {'isKnown': 'no'},
+      where: 'question = ?',
+      whereArgs: [question],
+    );
+  }
+
+  Future<int> updateIsKnown(String name, String isKnown) async {
+    final db = await database;
+    return await db.update(
+      tableName,
+      {'isKnown': isKnown},
+      where: 'question = ?',
+      whereArgs: [name],
+    );
+  }
+
+  Future<List<String>> getKnownQuestionsByLevel(String level) async {
+    final db = await QuestionDatabaseHelper().database;
+    var res = await db.query(
+      QuestionDatabaseHelper.tableName,
+      columns: ['question'],
+      where: 'isKnown = ? AND level = ?',
+      whereArgs: ['yes', level],
+    );
+
+    List<String?> knownQuestions = res.isNotEmpty ? res.map((e) => QuestionModel.fromJson(e).question).toList() : [];
+
+    List<String> filteredKnownQuestions = knownQuestions.where((name) => name != null).map((e) => e!).toList();
+
+    return filteredKnownQuestions;
+  }
+
+  Future<String?> isKnownQuestion(String question) async {
+    final db = await QuestionDatabaseHelper().database;
+    var res = await db.query(
+      QuestionDatabaseHelper.tableName,
+      columns: ['isKnown'],
+      where: 'question = ?',
+      whereArgs: [question],
+    );
+
+    if (res.isNotEmpty) {
+      return res.first['isKnown'] as String?;
+    } else {
+      return null;
+    }
+  }
+
+  //GENERAL QUESTİON SERVİCE
+
+  Future<bool> doesQuestionExistByWord(String word) async {
+    final db = await database;
+    var res = await db.query(
+      tableName,
+      where: 'question = ?',
+      whereArgs: [word],
+    );
+    return res.isNotEmpty;
   }
 
   Future<List<String>> getQuestionNames(String level) async {
@@ -48,22 +131,50 @@ class QuestionDatabaseHelper {
   }
 
   Future<String?> getQuestionLevel(String name) async {
-  final db = await database;
-  var res = await db.query(
-    tableName,
-    columns: ['level'],
-    where: 'question = ?',
-    whereArgs: [name],
-  );
-  
-  if (res.isNotEmpty) {
-    return res.first['level'] as String?;
-  } else {
-    return null;
+    final db = await database;
+    var res = await db.query(
+      tableName,
+      columns: ['level'],
+      where: 'question = ?',
+      whereArgs: [name],
+    );
+
+    if (res.isNotEmpty) {
+      return res.first['level'] as String?;
+    } else {
+      return null;
+    }
   }
-}
 
+  Future<List<String>> getStarredQuestions() async {
+    final db = await QuestionDatabaseHelper().database;
+    var res = await db.query(
+      QuestionDatabaseHelper.tableName,
+      columns: ['question'],
+      where: 'isStar = ?',
+      whereArgs: ['yes'],
+    );
 
+    List<String> starredQuestions = res.isNotEmpty ? res.map((e) => e['question'] as String).toList() : [];
+
+    return starredQuestions;
+  }
+
+  Future<List<String>> getStarredQuestionsByLevel(String level) async {
+    final db = await QuestionDatabaseHelper().database;
+    var res = await db.query(
+      QuestionDatabaseHelper.tableName,
+      columns: ['question'],
+      where: 'isStar = ? AND level = ?',
+      whereArgs: ['yes', level],
+    );
+
+    List<String> starredQuestions = res.isNotEmpty ? res.map((e) => e['question'] as String).toList() : [];
+
+    return starredQuestions;
+  }
+
+  //GENERAL ANSWER SERVİCE
   Future<List<String>> getAnswerNames(String level) async {
     final db = await database;
     var res = await db.query(tableName, where: "level = ?", whereArgs: [level]);
@@ -75,30 +186,30 @@ class QuestionDatabaseHelper {
     return filteredAnswerNames;
   }
 
-  Future<bool> doesQuestionExistByWord(String word) async {
-    final db = await database;
-    var res = await db.query(
-      tableName,
-      where: 'question = ?',
-      whereArgs: [word],
-    );
-    return res.isNotEmpty;
-  }
+  // STAR SERVİCE
 
-  Future<int> getNumberQuestion(String level) async {
-    final db = await database;
-    var res = await db.query(tableName, where: "level = ?", whereArgs: [level]);
-
-    List<String?> questionNames = res.isNotEmpty ? res.map((e) => QuestionModel.fromJson(e).question).toList() : [];
-
-    List<String> filteredQuestionNames = questionNames.where((name) => name != null).map((e) => e!).toList();
-
-    return filteredQuestionNames.length;
-  }
-
-  Future<void> clearTable() async {
+  Future<void> deleteStar(String question) async {
     final db = await QuestionDatabaseHelper().database;
-    await db.delete(QuestionDatabaseHelper.tableName);
+    await db.update(
+      QuestionDatabaseHelper.tableName,
+      {'isStar': 'not'},
+      where: 'question = ?',
+      whereArgs: [question],
+    );
+  }
+
+  Future<List<String>> getStarredQuestionAnswersByLevel(String level) async {
+    final db = await QuestionDatabaseHelper().database;
+    var res = await db.query(
+      QuestionDatabaseHelper.tableName,
+      columns: ['answer'],
+      where: 'isStar = ? AND level = ?',
+      whereArgs: ['yes', level],
+    );
+
+    List<String> starredQuestionAnswers = res.isNotEmpty ? res.map((e) => e['answer'] as String).toList() : [];
+
+    return starredQuestionAnswers;
   }
 
   Future<void> deleteDatabasee() async {

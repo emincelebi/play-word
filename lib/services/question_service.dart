@@ -27,7 +27,7 @@ class QuestionService {
         bool doesExist = await queDb.doesQuestionExistByWord(word);
         if (!doesExist) {
           int insertedId = await queDb.insertQuestion(
-            QuestionModel(question: word, answer: answer, level: level),
+            QuestionModel(question: word, answer: answer, level: level, isKnown: 'not', isStar: 'not'),
           );
           if (insertedId != -1) {
             if (kDebugMode) {

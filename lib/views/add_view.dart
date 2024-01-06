@@ -10,7 +10,7 @@ class AddView extends StatefulWidget {
 }
 
 class _AddViewState extends State<AddView> {
-  String? selectedLevel = 'A';
+  String? selectedLevel = 'a';
   TextEditingController questionController = TextEditingController();
   TextEditingController answerController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -46,7 +46,7 @@ class _AddViewState extends State<AddView> {
                     Row(
                       children: [
                         Radio<String>(
-                          value: 'A',
+                          value: 'a',
                           groupValue: selectedLevel,
                           onChanged: (value) {
                             setState(() {
@@ -56,7 +56,7 @@ class _AddViewState extends State<AddView> {
                         ),
                         const Text('A'),
                         Radio<String>(
-                          value: 'B',
+                          value: 'b',
                           groupValue: selectedLevel,
                           onChanged: (value) {
                             setState(() {
@@ -66,7 +66,7 @@ class _AddViewState extends State<AddView> {
                         ),
                         const Text('B'),
                         Radio<String>(
-                          value: 'C',
+                          value: 'c',
                           groupValue: selectedLevel,
                           onChanged: (value) {
                             setState(() {
@@ -121,12 +121,12 @@ class _AddViewState extends State<AddView> {
                         onPressed: () async {
                           FocusScope.of(context).unfocus();
                           if (_formKey.currentState!.validate()) {
-                            bool x = await queDb.doesQuestionExistByWord(questionController.text);
+                            bool x = await queDb.doesQuestionExistByWord(questionController.text.toUpperCase());
                             if (!x) {
                               int i = await queDb.insertQuestion(
                                 QuestionModel(
-                                    question: questionController.text,
-                                    answer: answerController.text,
+                                    question: questionController.text.toUpperCase(),
+                                    answer: answerController.text.toUpperCase(),
                                     level: selectedLevel),
                               );
                               if (i > 0) {
@@ -134,6 +134,7 @@ class _AddViewState extends State<AddView> {
                                 answerController.clear();
                               }
                             } else {
+                              // ignore: use_build_context_synchronously
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('This question already exists in the database.'),

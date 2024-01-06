@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:play_word/constants/constants.dart';
 import 'package:play_word/models/question_model.dart';
 import 'package:play_word/services/question_database.dart';
-import 'package:play_word/services/star_question_database.dart';
 import 'package:play_word/services/word_manager.dart';
 import 'package:play_word/views/game_over_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +24,6 @@ class _GameViewState extends State<GameView> {
   TextEditingController textController = TextEditingController();
   WordManager wManager = WordManager();
   late QuestionDatabaseHelper queDb;
-  late StarDatabaseHelper starDb;
   List starQuestions = [];
   List questions = [];
   List answers = [];
@@ -34,13 +32,11 @@ class _GameViewState extends State<GameView> {
   List<String> wordLetters = [];
   List<double> fontSizeOptions = [16, 18, 20, 22, 24];
   late final SharedPreferences _manager;
-  List<String> splitWord = [];
 
   @override
   void initState() {
     super.initState();
     queDb = QuestionDatabaseHelper();
-    starDb = StarDatabaseHelper();
     life = 3;
     hint = 3;
     score = 0;
@@ -53,7 +49,7 @@ class _GameViewState extends State<GameView> {
   }
 
   fetchQuestions() async {
-    starQuestions = await starDb.getQuestionNames();
+    starQuestions = await queDb.getStarredQuestions();
     questions = await queDb.getQuestionNames(widget.level);
     answers = await queDb.getAnswerNames(widget.level);
     int randomIndex = Random().nextInt(questions.length - 1);
@@ -84,9 +80,10 @@ class _GameViewState extends State<GameView> {
     }
   }
 
-  doControl(String ans) {
-    if (question.toLowerCase() == ans) {
+  doControl(String ans) async {
+    if (question.toLowerCase() == ans.toLowerCase()) {
       score++;
+      await queDb.updateIsKnown(question, 'yes');
       int s = Random().nextInt(questions.length - 1);
       question = questions[s];
       answer = answers[s];
@@ -184,11 +181,13 @@ class _GameViewState extends State<GameView> {
         actions: [
           IconButton(
               onPressed: () async {
+                String s = await queDb.isKnownQuestion(question) ?? 'yes';
                 if (isStar(question)) {
-                  starDb.deleteStar(question);
+                  queDb.deleteStar(question);
                   starQuestions.remove(question);
                 } else {
-                  starDb.insertQuestion(QuestionModel(question: question, answer: answer));
+                  queDb.insertQuestion(QuestionModel(
+                      question: question, answer: answer, isKnown: s, isStar: 'yes', level: widget.level));
                   starQuestions.add(question);
                 }
                 setState(() {});
