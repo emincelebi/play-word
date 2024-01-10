@@ -50,8 +50,8 @@ class _GameViewState extends State<GameView> {
 
   fetchQuestions() async {
     starQuestions = await queDb.getStarredQuestions();
-    questions = await queDb.getQuestionNames(widget.level);
-    answers = await queDb.getAnswerNames(widget.level);
+    questions = await queDb.getQuestionUnknown(widget.level);
+    answers = await queDb.getAnswersUnknown(widget.level);
     int randomIndex = Random().nextInt(questions.length - 1);
     starIndex = randomIndex;
     answer = answers[randomIndex];
@@ -247,7 +247,7 @@ class _GameViewState extends State<GameView> {
                     borderSide: const BorderSide(color: Colors.grey),
                   ),
                   filled: true,
-                  fillColor: Colors.grey[800], // Alan rengi
+                  fillColor: Colors.grey[800],
                   labelStyle: const TextStyle(color: Colors.white),
                   hintStyle: TextStyle(color: Colors.grey[400]),
                 ),

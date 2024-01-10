@@ -52,47 +52,99 @@ class _MyProfileViewState extends State<MyProfileView> {
     }
   }
 
+  Future<void> deleteHalfQuestions() async {
+    for (int i = 0; i < knownQuestions.length; i++) {
+      await dbHelper.deleteKnown(knownQuestions[i]);
+      knownQuestions.remove(knownQuestions[i]);
+      knownAnswers.remove(knownAnswers[i]);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Radio<String>(
-              value: 'a',
-              groupValue: selectedLevel,
-              onChanged: (value) {
-                setState(() {
-                  selectedLevel = value ?? 'a';
-                  getKnownQuestions();
-                });
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Radio<String>(
+                  value: 'a',
+                  groupValue: selectedLevel,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedLevel = value ?? 'a';
+                      getKnownQuestions();
+                    });
+                  },
+                ),
+                const Text('A'),
+                Radio<String>(
+                  value: 'b',
+                  groupValue: selectedLevel,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedLevel = value ?? 'a';
+                      getKnownQuestions();
+                    });
+                  },
+                ),
+                const Text('B'),
+                Radio<String>(
+                  value: 'c',
+                  groupValue: selectedLevel,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedLevel = value ?? 'a';
+                      getKnownQuestions();
+                    });
+                  },
+                ),
+                const Text('C'),
+              ],
             ),
-            const Text('A'),
-            Radio<String>(
-              value: 'b',
-              groupValue: selectedLevel,
-              onChanged: (value) {
-                setState(() {
-                  selectedLevel = value ?? 'a';
-                  getKnownQuestions();
-                });
-              },
-            ),
-            const Text('B'),
-            Radio<String>(
-              value: 'c',
-              groupValue: selectedLevel,
-              onChanged: (value) {
-                setState(() {
-                  selectedLevel = value ?? 'a';
-                  getKnownQuestions();
-                });
-              },
-            ),
-            const Text('C'),
+            Row(
+              children: [
+                IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Are you sure?'),
+                            content: const Text('Delete Half of Known Questions'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () async {
+                                    await deleteHalfQuestions();
+                                    // ignore: use_build_context_synchronously
+                                    Navigator.of(context).pop();
+                                    setState(() {});
+                                  },
+                                  child: const Text(
+                                    'Yes',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text(
+                                    'No',
+                                    style: TextStyle(color: Colors.red),
+                                  )),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    color: Colors.red,
+                    icon: const Icon(Icons.delete_forever_outlined))
+              ],
+            )
           ],
         ),
         Expanded(

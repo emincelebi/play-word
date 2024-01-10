@@ -118,8 +118,9 @@ class _StarQuestionViewState extends State<StarQuestionView> {
                         trailing: IconButton(
                             onPressed: () async {
                               if (isStar(starQuestion[index])) {
-                                queDb.deleteStar(starQuestion[index]);
+                                await queDb.deleteStar(starQuestion[index]);
                                 starQuestion.remove(starQuestion[index]);
+                                starAnswer.remove(starAnswer[index]);
                               }
                               setState(() {});
                             },

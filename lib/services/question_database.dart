@@ -174,6 +174,16 @@ class QuestionDatabaseHelper {
     return starredQuestions;
   }
 
+  Future<List> getQuestionUnknown(String level) async {
+    final db = await database;
+    var res =
+        await db.query(tableName, columns: ['question'], where: "isKnown = ? AND level = ?", whereArgs: ['not', level]);
+
+    List unknownQuestions = res.isNotEmpty ? res.map((e) => e['question'] as String).toList() : [];
+
+    return unknownQuestions;
+  }
+
   //GENERAL ANSWER SERVİCE
   Future<List<String>> getAnswerNames(String level) async {
     final db = await database;
@@ -184,6 +194,16 @@ class QuestionDatabaseHelper {
     List<String> filteredAnswerNames = answerNames.where((name) => name != null).map((e) => e!).toList();
 
     return filteredAnswerNames;
+  }
+
+  Future<List> getAnswersUnknown(String level) async {
+    final db = await database;
+    var res =
+        await db.query(tableName, columns: ['answer'], where: "isKnown = ? AND level = ?", whereArgs: ['not', level]);
+
+    List unknownAnswers = res.isNotEmpty ? res.map((e) => e['answer'] as String).toList() : [];
+
+    return unknownAnswers;
   }
 
   // STAR SERVİCE
